@@ -38,7 +38,11 @@ export const profile = new GraphQLObjectType({
     name: 'Profile',
     fields: {
         id: {type: new GraphQLNonNull(GraphQLID)},
-        name: {type: new GraphQLNonNull(GraphQLBoolean)},
-        balance: {type: new GraphQLNonNull(GraphQLInt)},
+        isMale: {type: new GraphQLNonNull(GraphQLBoolean)},
+        yearOfBirth: {type: new GraphQLNonNull(GraphQLInt)},
+        user: {type: user},
+        userId: {type: GraphQLID},
+        memberType: {type: memberType},
+        memberTypeId: {type: GraphQLID}
     }
 });
