@@ -1,33 +1,66 @@
-import {GraphQLList, GraphQLObjectType} from "graphql/type/index.js";
-import {memberType, post, profile, user} from "./graphQLTypes.js";
+import {
+    GraphQLList, GraphQLNonNull,
+    GraphQLObjectType,
+} from "graphql/type/index.js";
+import {memberType, profile, user} from "./graphQLTypes.js";
 import {PrismaClient} from "@prisma/client";
+import {MemberTypeId} from "./types/memberType.js";
+import {UUIDType} from "./types/uuid.js";
+import {profileType} from "./types/profileType.js";
+import {postType} from "./types/postType.js";
+import {userType} from "./types/userType.js";
 
-const prisma = new PrismaClient();
+export const prisma = new PrismaClient();
 
 export const rootQuery = new GraphQLObjectType({
     name: 'Query',
-    fields: {
+    fields: () => ({
         memberTypes: {
             type: new GraphQLList(memberType),
             resolve: async () => {
                 try {
                     return await prisma.memberType.findMany();
                 } catch (error) {
-                    console.error('Ошибка при получении списка MemberTypes:', error);
-                    throw new Error('Ошибка при получении списка MemberTypes');
+                    console.error('Error in getting memberType list:', error);
+                    throw new Error('Error in getting memberType list');
+                }
+            },
+        },
+        memberType: {
+            type: memberType,
+            args: {id: {type: new GraphQLNonNull(MemberTypeId)}},
+            resolve: async (_, givenId) => {
+                try {
+                    return await prisma.memberType.findFirst({ where: givenId});
+                } catch (error) {
+                    console.error('Error in getting memberType:', error);
+                    throw new Error('Error in getting memberType');
                 }
             },
         },
         posts: {
-            type: new GraphQLList(post),
+            type: new GraphQLList(postType),
             resolve: async () => {
                 try {
                     return await prisma.post.findMany();
                 } catch (error) {
-                    console.error('Ошибка при получении списка Post:', error);
-                    throw new Error('Ошибка при получении списка Post');
+                    console.error('Error in getting post list:', error);
+                    throw new Error('Error in getting post list');
                 }
             },
+        },
+        post: {
+            type: postType,
+            args: { id: { type: new GraphQLNonNull(UUIDType) } },
+            resolve: async (_, givenId) => {
+                try {
+                    return await prisma.post.findFirst({ where: givenId });
+                } catch (error) {
+                    console.error('Error in getting post:', error);
+                    throw new Error('Error in getting post');
+                }
+            }
+
         },
         users: {
             type: new GraphQLList(user),
@@ -35,10 +68,23 @@ export const rootQuery = new GraphQLObjectType({
                 try {
                     return await prisma.user.findMany();
                 } catch (error) {
-                    console.error('Ошибка при получении списка User:', error);
-                    throw new Error('Ошибка при получении списка User');
+                    console.error('Error in getting user list:', error);
+                    throw new Error('Error in getting user list');
                 }
             },
+        },
+        user: {
+            type: userType,
+            args: { id: { type: UUIDType } },
+            resolve: async (_, givenId) => {
+                try {
+                    return await prisma.user.findFirst({ where: givenId });
+                } catch (error) {
+                    console.error('Error in getting user:', error);
+                    throw new Error('Error in getting user');
+                }
+            }
+
         },
         profiles: {
             type: new GraphQLList(profile),
@@ -46,10 +92,22 @@ export const rootQuery = new GraphQLObjectType({
                 try {
                     return await prisma.profile.findMany();
                 } catch (error) {
-                    console.error('Ошибка при получении списка Profile:', error);
-                    throw new Error('Ошибка при получении списка Profile');
+                    console.error('Error in getting profile list:', error);
+                    throw new Error('Error in getting profile list');
                 }
             },
-        }
-    },
+        },
+        profile: {
+            type: profileType,
+            args: { id: { type: UUIDType } },
+            resolve: async (_, givenId) => {
+                try {
+                    return await prisma.profile.findFirst({ where: givenId });
+                } catch (error) {
+                    console.error('Error in getting profile:', error);
+                    throw new Error('Error in getting profile');
+                }
+            }
+        },
+    }),
 })
