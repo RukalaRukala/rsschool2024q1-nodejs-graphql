@@ -1,6 +1,7 @@
-import {GraphQLID, GraphQLObjectType, GraphQLString} from "graphql/type/index.js";
+import {GraphQLObjectType, GraphQLString} from "graphql/type/index.js";
 import {prisma} from "../rootQuery.js";
 import {IUser, userType} from "./userType.js";
+import {UUIDType} from "./uuid.js";
 
 export interface IPost {
     id: string;
@@ -9,30 +10,21 @@ export interface IPost {
     author: IUser;
     authorId: string;
 }
-export interface IArgs {
-    id?: string;
-}
 
 export const postType: GraphQLObjectType<IPost> = new  GraphQLObjectType(
     {
         name: 'PostType',
         fields: () => ({
-            id: {type: GraphQLID},
+            id: {type: UUIDType},
             title:{type: GraphQLString},
             content: {type: GraphQLString},
 
+            authorId: {type: UUIDType},
             author: {
                 type: userType,
                 resolve: async (thisPost) => {
                     return await prisma.user.findUnique({where: {id: thisPost.authorId}})
                 }
             },
-            authorId: {
-                type: GraphQLID,
-                resolve: async (thisPost, args) => {
-                    const authorId: IUser = await prisma.user.findUnique({where: {id: args.id}}) as IUser;
-                    return authorId ? authorId : null;
-                }
-            }
         })
     });

@@ -2,9 +2,8 @@ import {
     GraphQLList, GraphQLNonNull,
     GraphQLObjectType,
 } from "graphql/type/index.js";
-import {memberType, profile, user} from "./graphQLTypes.js";
 import {PrismaClient} from "@prisma/client";
-import {MemberTypeId} from "./types/memberType.js";
+import {memberType, MemberTypeId} from "./types/memberType.js";
 import {UUIDType} from "./types/uuid.js";
 import {profileType} from "./types/profileType.js";
 import {postType} from "./types/postType.js";
@@ -63,7 +62,7 @@ export const rootQuery = new GraphQLObjectType({
 
         },
         users: {
-            type: new GraphQLList(user),
+            type: new GraphQLList(userType),
             resolve: async () => {
                 try {
                     return await prisma.user.findMany();
@@ -87,7 +86,7 @@ export const rootQuery = new GraphQLObjectType({
 
         },
         profiles: {
-            type: new GraphQLList(profile),
+            type: new GraphQLList(profileType),
             resolve: async () => {
                 try {
                     return await prisma.profile.findMany();
