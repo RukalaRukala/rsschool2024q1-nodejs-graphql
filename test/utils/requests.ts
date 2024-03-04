@@ -88,6 +88,7 @@ export async function getPost(app: FastifyInstance, id: string) {
     url: `/posts/${id}`,
     method: 'GET',
   });
+  console.log('Привет');
   const body = (await res.json()) as PostBody;
   return { res, body };
 }
