@@ -25,17 +25,17 @@ export const userType: GraphQLObjectType<IUser> = new  GraphQLObjectType(
         profile: {
             type: profileType,
             resolve: async (thisUser) => {
-                await prisma.profile.findUnique({where: {userId: thisUser.id}})
+                return await prisma.profile.findUnique({where: {userId: thisUser.id}})
             },
         },
         posts: {
             type: new GraphQLList(postType),
             resolve: async (thisUser) => {
-                await prisma.post.findMany({where: {authorId: thisUser.id}})
+                return await prisma.post.findMany({where: {authorId: thisUser.id}})
             },
         },
         userSubscribedTo: {
-            type: userType,
+            type: new GraphQLList(userType),
             resolve: async (thisUser) => {
                 const results = await prisma.subscribersOnAuthors.findMany({
                     where: { subscriberId: thisUser.id },

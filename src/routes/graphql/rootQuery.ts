@@ -30,7 +30,7 @@ export const rootQuery = new GraphQLObjectType({
             args: {id: {type: new GraphQLNonNull(MemberTypeId)}},
             resolve: async (_, givenId) => {
                 try {
-                    return await prisma.memberType.findFirst({ where: givenId});
+                    return await prisma.memberType.findUnique({ where: givenId});
                 } catch (error) {
                     console.error('Error in getting memberType:', error);
                     throw new Error('Error in getting memberType');
@@ -53,7 +53,7 @@ export const rootQuery = new GraphQLObjectType({
             args: { id: { type: new GraphQLNonNull(UUIDType) } },
             resolve: async (_, givenId) => {
                 try {
-                    return await prisma.post.findFirst({ where: givenId });
+                    return await prisma.post.findUnique({ where: givenId });
                 } catch (error) {
                     console.error('Error in getting post:', error);
                     throw new Error('Error in getting post');
@@ -77,7 +77,7 @@ export const rootQuery = new GraphQLObjectType({
             args: { id: { type: UUIDType } },
             resolve: async (_, givenId) => {
                 try {
-                    return await prisma.user.findFirst({ where: givenId });
+                    return await prisma.user.findUnique({ where: givenId });
                 } catch (error) {
                     console.error('Error in getting user:', error);
                     throw new Error('Error in getting user');
@@ -101,7 +101,7 @@ export const rootQuery = new GraphQLObjectType({
             args: { id: { type: UUIDType } },
             resolve: async (_, givenId) => {
                 try {
-                    return await prisma.profile.findFirst({ where: givenId });
+                    return await prisma.profile.findUnique({ where: givenId });
                 } catch (error) {
                     console.error('Error in getting profile:', error);
                     throw new Error('Error in getting profile');

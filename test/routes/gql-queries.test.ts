@@ -8,7 +8,7 @@ import {
   getPosts,
   getProfiles,
   getUsers,
-  gqlQuery,
+  gqlQuery, subscribeTo,
 } from '../utils/requests.js';
 import { MemberTypeId } from '../../src/routes/member-types/schemas.js';
 import {randomUUID} from "node:crypto";
@@ -96,6 +96,7 @@ await test('gql-queries', async (t) => {
         postId: post1.id,
       },
     });
+    console.log(data);
 
     t.ok(data.memberType.id === MemberTypeId.BASIC);
     t.ok(data.post.id === post1.id);
@@ -140,102 +141,101 @@ await test('gql-queries', async (t) => {
     t.ok(data.user === null);
     t.ok(data.userWithNullProfile.profile === null);
   });
-  //
-  // await t.test('Get user/users with his/their posts, profile, memberType.', async (t) => {
-  //   const { body: user1 } = await createUser(app);
-  //   const { body: post1 } = await createPost(app, user1.id);
-  //   const { body: profile1 } = await createProfile(app, user1.id, MemberTypeId.BASIC);
-  //
-  //   const {
-  //     body: { data: dataUser },
-  //   } = await gqlQuery(app, {
-  //     query: `query ($userId: UUID!) {
-  //         user(id: $userId) {
-  //             id
-  //             profile {
-  //                 id
-  //                 memberType {
-  //                     id
-  //                 }
-  //             }
-  //             posts {
-  //                 id
-  //             }
-  //         }
-  //     }`,
-  //     variables: {
-  //       userId: user1.id,
-  //     },
-  //   });
-  //   const {
-  //     body: { data: dataUsers },
-  //   } = await gqlQuery(app, {
-  //     query: `query {
-  //         users {
-  //             id
-  //             profile {
-  //                 id
-  //                 memberType {
-  //                     id
-  //                 }
-  //             }
-  //             posts {
-  //                 id
-  //             }
-  //         }
-  //     }`,
-  //   });
-  //
-  //   t.ok(dataUser.user.id === user1.id);
-  //   t.ok(dataUser.user.profile.id === profile1.id);
-  //   t.ok(dataUser.user.profile.memberType?.id === MemberTypeId.BASIC);
-  //   t.ok(dataUser.user.posts[0].id === post1.id);
-  //
-  //   const foundUser1 = dataUsers.users.find((user) => user.id === user1.id);
-  //   t.same(foundUser1, dataUser.user);
-  // });
-  //
-  // await t.test(`Get user by id with his subs.`, async (t) => {
-  //   const { body: user1 } = await createUser(app);
-  //   const { body: user2 } = await createUser(app);
-  //   const { body: user3 } = await createUser(app);
-  //
-  //   await subscribeTo(app, user1.id, user2.id);
-  //   await subscribeTo(app, user3.id, user1.id);
-  //
-  //   const {
-  //     body: { data: data },
-  //   } = await gqlQuery(app, {
-  //     query: `query ($userId: UUID!) {
-  //         user(id: $userId) {
-  //             id
-  //             userSubscribedTo {
-  //                 id
-  //                 name
-  //                 subscribedToUser {
-  //                     id
-  //                 }
-  //             }
-  //             subscribedToUser {
-  //                 id
-  //                 name
-  //                 userSubscribedTo {
-  //                     id
-  //                 }
-  //             }
-  //         }
-  //     }`,
-  //     variables: {
-  //       userId: user1.id,
-  //     },
-  //   });
-  //
-  //   t.ok(data.user.userSubscribedTo[0].id === user2.id);
-  //   t.ok(data.user.userSubscribedTo[0].name === user2.name);
-  //   t.ok(data.user.userSubscribedTo[0].subscribedToUser[0].id === user1.id);
-  //
-  //   t.ok(data.user.subscribedToUser[0].id === user3.id);
-  //   t.ok(data.user.subscribedToUser[0].name === user3.name);
-  //   t.ok(data.user.subscribedToUser[0].userSubscribedTo[0].id === user1.id);
-  // });
+
+  await t.test('Get user/users with his/their posts, profile, memberType.', async (t) => {
+    const { body: user1 } = await createUser(app);
+    const { body: post1 } = await createPost(app, user1.id);
+    const { body: profile1 } = await createProfile(app, user1.id, MemberTypeId.BASIC);
+
+      const {
+        body: { data: dataUser },
+      } = await gqlQuery(app, {
+        query: `query ($userId: UUID!) {
+            user(id: $userId) {
+                id
+                profile {
+                    id
+                    memberType {
+                        id
+                    }
+                }
+                posts {
+                    id
+                }
+            }
+        }`,
+        variables: {
+          userId: user1.id,
+        },
+      });
+      const {
+        body: { data: dataUsers },
+      } = await gqlQuery(app, {
+        query: `query {
+            users {
+                id
+                profile {
+                    id
+                    memberType {
+                        id
+                    }
+                }
+                posts {
+                    id
+                }
+            }
+        }`,
+      });
+    t.ok(dataUser.user.id === user1.id);
+    t.ok(dataUser.user.profile.id === profile1.id);
+    t.ok(dataUser.user.profile.memberType?.id === MemberTypeId.BASIC);
+    t.ok(dataUser.user.posts[0].id === post1.id);
+
+    const foundUser1 = dataUsers.users.find((user) => user.id === user1.id);
+    t.same(foundUser1, dataUser.user);
+  });
+
+  await t.test(`Get user by id with his subs.`, async (t) => {
+    const { body: user1 } = await createUser(app);
+    const { body: user2 } = await createUser(app);
+    const { body: user3 } = await createUser(app);
+
+    await subscribeTo(app, user1.id, user2.id);
+    await subscribeTo(app, user3.id, user1.id);
+
+    const {
+      body: { data: data },
+    } = await gqlQuery(app, {
+      query: `query ($userId: UUID!) {
+          user(id: $userId) {
+              id
+              userSubscribedTo {
+                  id
+                  name
+                  subscribedToUser {
+                      id
+                  }
+              }
+              subscribedToUser {
+                  id
+                  name
+                  userSubscribedTo {
+                      id
+                  }
+              }
+          }
+      }`,
+      variables: {
+        userId: user1.id,
+      },
+    });
+
+    t.ok(data.user.userSubscribedTo[0].id === user2.id);
+    t.ok(data.user.userSubscribedTo[0].name === user2.name);
+    t.ok(data.user.userSubscribedTo[0].subscribedToUser[0].id === user1.id);
+
+    t.ok(data.user.subscribedToUser[0].id === user3.id);
+    t.ok(data.user.subscribedToUser[0].name === user3.name);
+    t.ok(data.user.subscribedToUser[0].userSubscribedTo[0].id === user1.id);
+  });
 });
