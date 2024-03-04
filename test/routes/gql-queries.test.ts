@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { test } from 'tap';
 import { build } from '../helper.js';
 import {
@@ -8,10 +9,10 @@ import {
   getPosts,
   getProfiles,
   getUsers,
-  gqlQuery, subscribeTo,
+  gqlQuery,
+  subscribeTo,
 } from '../utils/requests.js';
 import { MemberTypeId } from '../../src/routes/member-types/schemas.js';
-import {randomUUID} from "node:crypto";
 
 await test('gql-queries', async (t) => {
   const app = await build(t);
@@ -67,28 +68,28 @@ await test('gql-queries', async (t) => {
     const {
       body: { data },
     } = await gqlQuery(app, {
-          query: `query ($userId: UUID!, $profileId: UUID!, $memberTypeId: MemberTypeId!, $postId: UUID!) {
-            memberType(id: $memberTypeId) {
-                id
-                discount
-                postsLimitPerMonth
-            }
-            post(id: $postId) {
-                id
-                title
-                content
-            }
-            user(id: $userId) {
-                id
-                name
-                balance
-            }
-            profile(id: $profileId) {
-                id
-                isMale
-                yearOfBirth
-            }
-        }`,
+      query: `query ($userId: UUID!, $profileId: UUID!, $memberTypeId: MemberTypeId!, $postId: UUID!) {
+        memberType(id: $memberTypeId) {
+            id
+            discount
+            postsLimitPerMonth
+        }
+        post(id: $postId) {
+            id
+            title
+            content
+        }
+        user(id: $userId) {
+            id
+            name
+            balance
+        }
+        profile(id: $profileId) {
+            id
+            isMale
+            yearOfBirth
+        }
+    }`,
       variables: {
         userId: user1.id,
         profileId: profile1.id,
@@ -96,7 +97,6 @@ await test('gql-queries', async (t) => {
         postId: post1.id,
       },
     });
-    console.log(data);
 
     t.ok(data.memberType.id === MemberTypeId.BASIC);
     t.ok(data.post.id === post1.id);
@@ -147,45 +147,46 @@ await test('gql-queries', async (t) => {
     const { body: post1 } = await createPost(app, user1.id);
     const { body: profile1 } = await createProfile(app, user1.id, MemberTypeId.BASIC);
 
-      const {
-        body: { data: dataUser },
-      } = await gqlQuery(app, {
-        query: `query ($userId: UUID!) {
-            user(id: $userId) {
-                id
-                profile {
-                    id
-                    memberType {
-                        id
-                    }
-                }
-                posts {
-                    id
-                }
-            }
-        }`,
-        variables: {
-          userId: user1.id,
-        },
-      });
-      const {
-        body: { data: dataUsers },
-      } = await gqlQuery(app, {
-        query: `query {
-            users {
-                id
-                profile {
-                    id
-                    memberType {
-                        id
-                    }
-                }
-                posts {
-                    id
-                }
-            }
-        }`,
-      });
+    const {
+      body: { data: dataUser },
+    } = await gqlQuery(app, {
+      query: `query ($userId: UUID!) {
+          user(id: $userId) {
+              id
+              profile {
+                  id
+                  memberType {
+                      id
+                  }
+              }
+              posts {
+                  id
+              }
+          }
+      }`,
+      variables: {
+        userId: user1.id,
+      },
+    });
+    const {
+      body: { data: dataUsers },
+    } = await gqlQuery(app, {
+      query: `query {
+          users {
+              id
+              profile {
+                  id
+                  memberType {
+                      id
+                  }
+              }
+              posts {
+                  id
+              }
+          }
+      }`,
+    });
+
     t.ok(dataUser.user.id === user1.id);
     t.ok(dataUser.user.profile.id === profile1.id);
     t.ok(dataUser.user.profile.memberType?.id === MemberTypeId.BASIC);
