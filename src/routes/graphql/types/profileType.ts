@@ -30,15 +30,14 @@ export const profileType: GraphQLObjectType<IProfile> = new  GraphQLObjectType(
             userId: {type: UUIDType},
             user: {
                 type: userType,
-                resolve: async (thisProfile) => {
-                    return await prisma.user.findUnique({where: {id: thisProfile.userId}})
-                },
+                resolve: async (thisProfile) =>
+                    await prisma.user.findUnique({where: {id: thisProfile.userId}})
             },
             memberTypeId: { type: MemberTypeId },
             memberType: {
                 type: memberType,
                 resolve: async (thisProfile) =>
-                    await prisma.memberType.findFirst({ where: { id: thisProfile.memberTypeId } }),
+                    await prisma.memberType.findUnique({where: {id: thisProfile.memberTypeId}}),
             },
         })
     });

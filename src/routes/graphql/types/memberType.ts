@@ -33,9 +33,8 @@ export const memberType: GraphQLObjectType<IMemberType> = new  GraphQLObjectType
 
             profiles: {
                 type: new GraphQLList(profileType),
-                resolve: async (thisMemberType) => {
-                    return await prisma.profile.findMany({where: {memberTypeId: thisMemberType.id}})
-                },
+                resolve: async (thisMemberType) =>
+                    await prisma.profile.findMany({where: {memberTypeId: thisMemberType.id}}),
             },
         })
     });
